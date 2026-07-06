@@ -1,10 +1,10 @@
 package jpademo.jpademo.config;
 
 import io.jsonwebtoken.Claims;
-
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -16,8 +16,22 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
     
-    // Secret key for signing JWT (minimum 256 bits for HS256)
-    private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Value("${jwt.secret}")
+    private String secretKeyString;
+    
+    private Key signingKey;
+    
+    @PostConstruct
+    public void init() {
+        byte[] keyBytes = secretKeyString.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        if (keyBytes.length < 32) {
+            byte[] paddedKey = new byte[32];
+            System.arraycopy(keyBytes, 0, paddedKey, 0, Math.min(keyBytes.length, 32));
+            this.signingKey = Keys.hmacShaKeyFor(paddedKey);
+        } else {
+            this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+        }
+    }
     
     // Token validity: 10 hours
     private static final long JWT_TOKEN_VALIDITY = 10 * 60 * 60 * 1000;
@@ -37,7 +51,7 @@ public class JwtUtil {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
-                .signWith(SECRET_KEY)
+                .signWith(signingKey)
                 .compact();
     }
 
@@ -60,7 +74,7 @@ public class JwtUtil {
     // Extract all claims
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

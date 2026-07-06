@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Edit, IndianRupee } from 'lucide-react';
 
@@ -21,7 +22,7 @@ const IncomeManager = ({ userId, onClose, onIncomeAdded }) => {
 
   const fetchIncomes = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/incomes/user/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/api/incomes/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setIncomes(data);
@@ -45,8 +46,8 @@ const IncomeManager = ({ userId, onClose, onIncomeAdded }) => {
       };
 
       const url = editingIncome 
-        ? `http://localhost:8080/api/incomes/${editingIncome.id}`
-        : 'http://localhost:8080/api/incomes';
+        ? `${API_BASE_URL}/api/incomes/${editingIncome.id}`
+        : `${API_BASE_URL}/api/incomes`;
       
       const method = editingIncome ? 'PUT' : 'POST';
 
@@ -89,7 +90,7 @@ const IncomeManager = ({ userId, onClose, onIncomeAdded }) => {
     if (!window.confirm('Delete this income?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/incomes/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/incomes/${id}`, {
         method: 'DELETE'
       });
 

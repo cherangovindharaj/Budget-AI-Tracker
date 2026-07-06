@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from "react";
 
 const SavingGoal = ({ userId, balance }) => {
@@ -5,13 +6,13 @@ const SavingGoal = ({ userId, balance }) => {
   const [inputGoal, setInputGoal] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8080/api/saving-goal/${userId}`)
+    fetch(`${API_BASE_URL}/api/saving-goal/${userId}`)
       .then(res => res.json())
       .then(data => setGoal(data));
   }, [userId]);
 
   const setSavingGoal = async () => {
-    const response = await fetch("http://localhost:8080/api/saving-goal/set", {
+    const response = await fetch(`${API_BASE_URL}/api/saving-goal/set`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, goalAmount: inputGoal, savedAmount: balance })

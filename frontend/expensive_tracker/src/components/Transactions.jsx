@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Edit2, Search, Filter, TrendingDown, Calendar, X } from "lucide-react";
 
@@ -67,8 +68,8 @@ const Transactions = () => {
     try {
       const token = localStorage.getItem("token");
       const url = userId
-        ? `http://localhost:8080/api/expenses/user/${userId}`
-        : `http://localhost:8080/api/expenses`;
+        ? `${API_BASE_URL}/api/expenses/user/${userId}`
+        : `${API_BASE_URL}/api/expenses`;
       const res = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
       });
@@ -156,7 +157,7 @@ const payload = {
       const headers = { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) };
 
       if (isEditing && formData.id) {
-        const url = `http://localhost:8080/api/expenses/${formData.id}`;
+        const url = `${API_BASE_URL}/api/expenses/${formData.id}`;
         const res = await fetch(url, {
           method: "PUT",
           headers,
@@ -173,7 +174,7 @@ const payload = {
 
         alert("✅ Expense updated successfully!");
       } else {
-        const url = "http://localhost:8080/api/expenses";
+        const url = `${API_BASE_URL}/api/expenses`;
         const res = await fetch(url, {
           method: "POST",
           headers,
@@ -214,7 +215,7 @@ const payload = {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:8080/api/expenses/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/expenses/${id}`, {
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
       });

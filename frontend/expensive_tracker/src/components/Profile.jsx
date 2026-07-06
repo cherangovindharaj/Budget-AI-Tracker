@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, User, Mail, Shield, IndianRupee, TrendingUp, TrendingDown, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +31,7 @@ const Profile = () => {
 
   const fetchExpenses = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/expenses/user/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/api/expenses/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         const total = data.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
@@ -43,7 +44,7 @@ const Profile = () => {
 
   const fetchIncomes = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/incomes/user/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/api/incomes/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         const total = data.reduce((sum, income) => sum + parseFloat(income.amount || 0), 0);

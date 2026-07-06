@@ -1,9 +1,10 @@
+import { API_BASE_URL } from '../config';
 import React, { useEffect, useState, useMemo } from 'react';
 import { X, Send, ThumbsUp, ThumbsDown, MessageCircle, Filter, User, Download, FileText, Trash2 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const API = 'http://localhost:8080/api';
+const API = `${API_BASE_URL}/api`;
 
 export default function CommunityForum({ userData, onClose }) {
   const [posts, setPosts] = useState([]);

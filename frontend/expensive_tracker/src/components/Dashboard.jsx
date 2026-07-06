@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from "react";
 import IncomeManager from "./IncomeManager";
 import CommunityForum from './CommunityForum';
@@ -139,7 +140,7 @@ const Dashboard = () => {
   }, [expenses, searchTerm, filterCategory]);
 
   const fetchExpenses = async (userId) => {
-    const response = await fetch(`http://localhost:8080/api/expenses/user/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/api/expenses/user/${userId}`);
     const data = await response.json();
     setExpenses(Array.isArray(data) ? data : []);
     calculateStats(Array.isArray(data) ? data : []);
@@ -147,7 +148,7 @@ const Dashboard = () => {
   };
 
   const fetchIncomes = async (userId) => {
-    const response = await fetch(`http://localhost:8080/api/incomes/user/${userId}`);
+    const response = await fetch(`${API_BASE_URL}/api/incomes/user/${userId}`);
     const data = await response.json();
     const total = data.reduce((sum, income) => sum + parseFloat(income.amount || 0), 0);
     setTotalIncome(total);
@@ -224,7 +225,7 @@ const Dashboard = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure?")) return;
-    await fetch(`http://localhost:8080/api/expenses/${id}`, { method: "DELETE" });
+    await fetch(`${API_BASE_URL}/api/expenses/${id}`, { method: "DELETE" });
     fetchExpenses(userData.id);
   };
 

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState } from 'react';
 import { Eye, EyeOff, Wallet, TrendingUp, PiggyBank, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -59,7 +60,7 @@ const AuthPage = () => {
         ? { email: formData.email, password: formData.password }
         : { username: formData.username, email: formData.email, password: formData.password };
 
-      const response = await fetch(`http://localhost:8080${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

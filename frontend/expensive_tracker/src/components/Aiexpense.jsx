@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState } from 'react';
 import { TrendingUp, AlertTriangle, CheckCircle, Lightbulb, PieChart, DollarSign, Activity } from 'lucide-react';
 
@@ -7,7 +8,7 @@ const ExpenseTrackerDashboard = () => {
   const [result, setResult] = useState(null);
   
   // API Base URL
-  const API_BASE = 'http://localhost:8080/api/ai';
+  const API_BASE = `${API_BASE_URL}/api/ai`;
 
   // Sample data for testing
   const sampleExpenses = [

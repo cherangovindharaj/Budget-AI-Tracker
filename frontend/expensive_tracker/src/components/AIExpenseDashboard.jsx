@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { X, Lightbulb, PieChart, Activity, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Brain, Target, Zap, ArrowLeft } from 'lucide-react';
 
@@ -8,7 +9,7 @@ const AIExpenseDashboard = ({ userData, expenses, totalIncome, stats, onClose })
   const [categoryInput, setCategoryInput] = useState('');
 
   // API Base URL
-  const API_BASE = 'http://localhost:8080/api/ai';
+  const API_BASE = `${API_BASE_URL}/api/ai`;
 
   // Prepare expense data for API
   const expenseData = Object.entries(stats.categoryTotals).map(([category, amount]) => ({

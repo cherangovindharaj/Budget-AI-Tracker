@@ -1,8 +1,9 @@
+import { API_BASE_URL } from '../config';
 import React, { useEffect, useMemo, useState } from "react";
 import { Plus, Target, TrendingUp, Calendar, Trash2, PiggyBank, CheckCircle, X } from "lucide-react";
 
 // API Configuration
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = `${API_BASE_URL}/api`;
 const API = {
   list: (userId) => `${API_BASE}/saving-goals/user/${userId}`,
   create: () => `${API_BASE}/saving-goals`,

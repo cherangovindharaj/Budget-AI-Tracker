@@ -1,8 +1,9 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect, useMemo } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Target, TrendingUp, PiggyBank, Calendar, Award, Zap, X } from 'lucide-react';
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = `${API_BASE_URL}/api`;
 
 const SavingsDashboard = ({ userId, onClose }) => {
   const [goals, setGoals] = useState([]);

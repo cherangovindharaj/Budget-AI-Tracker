@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { Target, Plus, Trash2, AlertTriangle, Calendar, IndianRupee } from 'lucide-react';
 
@@ -32,7 +33,7 @@ const BudgetPage = () => {
 
   const fetchBudgets = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/budgets/user/${userData.id}`);
+      const response = await fetch(`${API_BASE_URL}/api/budgets/user/${userData.id}`);
       if (response.ok) {
         const data = await response.json();
         setBudgets(Array.isArray(data) ? data : []);
@@ -44,7 +45,7 @@ const BudgetPage = () => {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/expenses/user/${userData.id}`);
+      const response = await fetch(`${API_BASE_URL}/api/expenses/user/${userData.id}`);
       if (response.ok) {
         const data = await response.json();
         setExpenses(Array.isArray(data) ? data : []);
@@ -108,7 +109,7 @@ const BudgetPage = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:8080/api/budgets', {
+      const response = await fetch(`${API_BASE_URL}/api/budgets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -131,7 +132,7 @@ const BudgetPage = () => {
     if (!window.confirm('Are you sure you want to delete this budget?')) return;
     
     try {
-      const response = await fetch(`http://localhost:8080/api/budgets/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/budgets/${id}`, {
         method: 'DELETE'
       });
       if (response.ok) {

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { Users, IndianRupee, TrendingUp, Shield, LogOut, Trash2, User as UserIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +24,7 @@ const AdminDashboard = () => {
   const fetchAllData = async () => {
     try {
       // Fetch all users
-      const usersRes = await fetch('http://localhost:8080/api/users');
+      const usersRes = await fetch(`${API_BASE_URL}/api/users`);
       if (usersRes.ok) {
         const usersData = await usersRes.json();
         setUsers(usersData);
@@ -36,7 +37,7 @@ const AdminDashboard = () => {
 
       for (const user of users) {
         try {
-          const expensesRes = await fetch(`http://localhost:8080/api/expenses/user/${user.id}`);
+          const expensesRes = await fetch(`${API_BASE_URL}/api/expenses/user/${user.id}`);
           if (expensesRes.ok) {
             const expenses = await expensesRes.json();
             totalTransactions += expenses.length;
@@ -67,7 +68,7 @@ const AdminDashboard = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
         method: 'DELETE'
       });
 

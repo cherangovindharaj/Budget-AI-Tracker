@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
 
@@ -20,7 +21,7 @@ const BudgetManager = ({ userId, onClose }) => {
 
   const fetchBudgets = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/budgets/user/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/api/budgets/user/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setBudgets(data);
@@ -32,7 +33,7 @@ const BudgetManager = ({ userId, onClose }) => {
 
   const fetchAlerts = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/budgets/alerts/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/api/budgets/alerts/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setAlerts(data);
@@ -53,7 +54,7 @@ const BudgetManager = ({ userId, onClose }) => {
         period: formData.period
       };
 
-      const response = await fetch('http://localhost:8080/api/budgets', {
+      const response = await fetch(`${API_BASE_URL}/api/budgets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -76,7 +77,7 @@ const BudgetManager = ({ userId, onClose }) => {
     if (!window.confirm('Delete this budget?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/budgets/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/budgets/${id}`, {
         method: 'DELETE'
       });
 
