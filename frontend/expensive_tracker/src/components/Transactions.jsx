@@ -2,6 +2,33 @@ import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Edit2, Search, Filter, TrendingDown, Calendar, X } from "lucide-react";
 
+const C = {
+  bg: "#f8fafc", white: "#ffffff", border: "#e2e8f0", borderLight: "#f1f5f9",
+  accent: "#0ea5e9", accentLight: "#f0f9ff", accentMid: "#bae6fd",
+  text: "#0f172a", textSecondary: "#64748b", textMuted: "#94a3b8",
+  green: "#059669", greenLight: "#d1fae5", greenBorder: "#a7f3d0",
+  red: "#dc2626", redLight: "#fee2e2", redBorder: "#fecaca",
+  blue: "#2563eb", blueLight: "#dbeafe", blueBorder: "#bfdbfe",
+  orange: "#ea580c", orangeLight: "#fff7ed",
+};
+
+const categoryColors = {
+  Food:          { bg: "#fff7ed", color: "#ea580c", border: "#fed7aa" },
+  Transport:     { bg: "#eff6ff", color: "#2563eb", border: "#bfdbfe" },
+  Shopping:      { bg: "#f5f3ff", color: "#7c3aed", border: "#ddd6fe" },
+  Bills:         { bg: "#fefce8", color: "#ca8a04", border: "#fde68a" },
+  Entertainment: { bg: "#f0fdf4", color: "#16a34a", border: "#bbf7d0" },
+  Health:        { bg: "#fff1f2", color: "#e11d48", border: "#fecdd3" },
+  Education:     { bg: "#eef2ff", color: "#4338ca", border: "#c7d2fe" },
+  Other:         { bg: "#f8fafc", color: "#475569", border: "#e2e8f0" },
+};
+
+const categoryIcons = {
+  Food:"🍔", Transport:"🚗", Shopping:"🛍️", Bills:"📄",
+  Entertainment:"🎬", Health:"💊", Education:"📚", Other:"📌",
+};
+
+// ✅ Logic same - only UI changed
 const Transactions = () => {
   const [expenses, setExpenses] = useState([]);
   const [search, setSearch] = useState("");
@@ -10,46 +37,12 @@ const Transactions = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    id: null,
-    amount: "",
-    category: "",
-    date: new Date().toISOString().split("T")[0],
-    description: "",
+    id: null, amount: "", category: "",
+    date: new Date().toISOString().split("T")[0], description: "",
   });
   const [userData, setUserData] = useState(null);
 
-  const categories = [
-    "Food",
-    "Transport",
-    "Shopping",
-    "Bills",
-    "Entertainment",
-    "Health",
-    "Education",
-    "Other",
-  ];
-
-  const categoryColors = {
-    Food: "bg-gradient-to-r from-pink-100 to-pink-50 text-pink-700 border-pink-300",
-    Transport: "bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 border-blue-300",
-    Shopping: "bg-gradient-to-r from-purple-100 to-purple-50 text-purple-700 border-purple-300",
-    Bills: "bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 border-yellow-300",
-    Entertainment: "bg-gradient-to-r from-green-100 to-green-50 text-green-700 border-green-300",
-    Health: "bg-gradient-to-r from-red-100 to-red-50 text-red-700 border-red-300",
-    Education: "bg-gradient-to-r from-indigo-100 to-indigo-50 text-indigo-700 border-indigo-300",
-    Other: "bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 border-gray-300",
-  };
-
-  const categoryIcons = {
-    Food: "🍔",
-    Transport: "🚗",
-    Shopping: "🛍️",
-    Bills: "📄",
-    Entertainment: "🎬",
-    Health: "💊",
-    Education: "📚",
-    Other: "📌",
-  };
+  const categories = ["Food","Transport","Shopping","Bills","Entertainment","Health","Education","Other"];
 
   useEffect(() => {
     const user = sessionStorage.getItem("user") || localStorage.getItem("user");
@@ -57,9 +50,7 @@ const Transactions = () => {
       const parsed = JSON.parse(user);
       setUserData(parsed);
       fetchExpenses(parsed.id);
-    } else {
-      fetchExpenses();
-    }
+    } else fetchExpenses();
   }, []);
 
   const getId = (exp) => exp.id || exp._id || exp._doc?.id || exp._doc?._id;
@@ -67,354 +58,200 @@ const Transactions = () => {
   const fetchExpenses = async (userId) => {
     try {
       const token = localStorage.getItem("token");
-      const url = userId
-        ? `${API_BASE_URL}/api/expenses/user/${userId}`
-        : `${API_BASE_URL}/api/expenses`;
-      const res = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
-      });
-      if (!res.ok) {
-        console.error("Failed to fetch expenses", res.status);
-        setExpenses([]);
-        return;
-      }
+      const url = userId ? `${API_BASE_URL}/api/expenses/user/${userId}` : `${API_BASE_URL}/api/expenses`;
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" } });
+      if (!res.ok) { setExpenses([]); return; }
       const data = await res.json();
       setExpenses(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setExpenses([]);
-    }
+    } catch { setExpenses([]); }
   };
 
   const openAddModal = () => {
-    setFormData({
-      id: null,
-      amount: "",
-      category: "",
-      date: new Date().toISOString().split("T")[0],
-      description: "",
-    });
+    setFormData({ id: null, amount: "", category: "", date: new Date().toISOString().split("T")[0], description: "" });
     setIsEditing(false);
     setShowModal(true);
   };
 
   const handleEdit = (expense) => {
     const id = getId(expense);
-   let expenseDate = expense.expenseDate || "";
-
-    
-    // Better date handling
+    let expenseDate = expense.expenseDate || "";
     try {
       if (expenseDate) {
-        if (typeof expenseDate === 'string' && expenseDate.includes("T")) {
-          expenseDate = expenseDate.split("T")[0];
-        } else {
-          const d = new Date(expenseDate);
-          if (!isNaN(d.getTime())) {
-            expenseDate = d.toISOString().split("T")[0];
-          } else {
-            expenseDate = new Date().toISOString().split("T")[0];
-          }
-        }
-      } else {
-        expenseDate = new Date().toISOString().split("T")[0];
-      }
-    } catch (err) {
-      console.error("Date parsing error:", err);
-      expenseDate = new Date().toISOString().split("T")[0];
-    }
-
-    setFormData({
-      id,
-      amount: expense.amount?.toString() ?? "",
-      category: expense.category ?? "",
-      date: expenseDate,
-      description: expense.description ?? "",
-    });
+        if (typeof expenseDate === 'string' && expenseDate.includes("T")) expenseDate = expenseDate.split("T")[0];
+        else { const d = new Date(expenseDate); expenseDate = !isNaN(d.getTime()) ? d.toISOString().split("T")[0] : new Date().toISOString().split("T")[0]; }
+      } else expenseDate = new Date().toISOString().split("T")[0];
+    } catch { expenseDate = new Date().toISOString().split("T")[0]; }
+    setFormData({ id, amount: expense.amount?.toString() ?? "", category: expense.category ?? "", date: expenseDate, description: expense.description ?? "" });
     setIsEditing(true);
     setShowModal(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.amount || !formData.category || !formData.date) {
-      alert("Please fill all required fields.");
-      return;
-    }
-const payload = {
-  userId: userData?.id,
-  amount: parseFloat(formData.amount),
-  category: formData.category,
-  date: formData.date,
-  description: formData.description,
-};
-
-
+    if (!formData.amount || !formData.category || !formData.date) { alert("Please fill all required fields."); return; }
+    const payload = { userId: userData?.id, amount: parseFloat(formData.amount), category: formData.category, date: formData.date, description: formData.description };
     setSaving(true);
-
     try {
       const token = localStorage.getItem("token");
       const headers = { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) };
-
       if (isEditing && formData.id) {
-        const url = `${API_BASE_URL}/api/expenses/${formData.id}`;
-        const res = await fetch(url, {
-          method: "PUT",
-          headers,
-          body: JSON.stringify(payload),
-        });
-
-        const text = await res.text();
-
-        if (!res.ok) {
-          alert("Failed to update expense: " + (text || res.status));
-          setSaving(false);
-          return;
-        }
-
+        const res = await fetch(`${API_BASE_URL}/api/expenses/${formData.id}`, { method: "PUT", headers, body: JSON.stringify(payload) });
+        if (!res.ok) { alert("Failed to update expense: " + res.status); setSaving(false); return; }
         alert("✅ Expense updated successfully!");
       } else {
-        const url = `${API_BASE_URL}/api/expenses`;
-        const res = await fetch(url, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(payload),
-        });
-
-        const text = await res.text();
-
-        if (!res.ok) {
-          alert("Failed to add expense: " + (text || res.status));
-          setSaving(false);
-          return;
-        }
-
+        const res = await fetch(`${API_BASE_URL}/api/expenses`, { method: "POST", headers, body: JSON.stringify(payload) });
+        if (!res.ok) { alert("Failed to add expense: " + res.status); setSaving(false); return; }
         alert("✅ Expense added successfully!");
       }
-
-      setFormData({
-        id: null,
-        amount: "",
-        category: "",
-        date: new Date().toISOString().split("T")[0],
-        description: "",
-      });
-      setIsEditing(false);
-      setShowModal(false);
-      setSaving(false);
+      setFormData({ id: null, amount: "", category: "", date: new Date().toISOString().split("T")[0], description: "" });
+      setIsEditing(false); setShowModal(false); setSaving(false);
       fetchExpenses(userData?.id);
-    } catch (err) {
-      console.error("Submit error:", err);
-      alert("Network error while saving.");
-      setSaving(false);
-    }
+    } catch { alert("Network error while saving."); setSaving(false); }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this expense?")) return;
-
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_BASE_URL}/api/expenses/${id}`, {
-        method: "DELETE",
-        headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Delete failed:", res.status, text);
-        alert("Failed to delete item");
-        return;
-      }
-
+      const res = await fetch(`${API_BASE_URL}/api/expenses/${id}`, { method: "DELETE", headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" } });
+      if (!res.ok) { alert("Failed to delete item"); return; }
       alert("🗑️ Deleted successfully!");
       fetchExpenses(userData?.id);
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert("Network error while deleting.");
-    }
+    } catch { alert("Network error while deleting."); }
   };
 
-  const filtered = expenses.filter((exp) => {
-    const matchSearch =
-      (exp.category || "").toLowerCase().includes(search.toLowerCase()) ||
-      (exp.description || "").toLowerCase().includes(search.toLowerCase());
+  const filtered = expenses.filter(exp => {
+    const matchSearch = (exp.category||"").toLowerCase().includes(search.toLowerCase()) || (exp.description||"").toLowerCase().includes(search.toLowerCase());
     const matchCategory = filterCategory === "All" || exp.category === filterCategory;
     return matchSearch && matchCategory;
   });
 
-  const totalAmount = filtered.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-  const totalCategories = new Set(filtered.map((e) => e.category)).size;
+  const totalAmount = filtered.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+  const totalCategories = new Set(filtered.map(e => e.category)).size;
+
+  const inp = {
+    width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`,
+    borderRadius: "9px", fontSize: "14px", color: C.text, outline: "none",
+    background: C.white, boxSizing: "border-box",
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 pb-28">
-      <div className="bg-white border-b shadow-lg sticky top-0 z-40 backdrop-blur-sm bg-opacity-95">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-purple-600 via-pink-500 to-purple-600 p-3 rounded-2xl shadow-xl animate-pulse">
-                <TrendingDown className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent">
-                  My Expenses
-                </h1>
-                <p className="text-gray-500 text-sm mt-1">Track and manage your spending</p>
-              </div>
-            </div>
-            <button
-              onClick={openAddModal}
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 text-white px-6 py-3 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 font-semibold"
-            >
-              <Plus size={20} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Add Expense</span>
-            </button>
+    <div style={{ minHeight: "100vh", background: C.bg, paddingBottom: "40px" }}>
+
+      {/* Header */}
+      <div style={{ background: C.white, borderBottom: `1px solid ${C.border}`, padding: "16px 24px", position: "sticky", top: 0, zIndex: 40, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ width: "38px", height: "38px", background: C.accent, borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <TrendingDown size={18} color="white" />
+          </div>
+          <div>
+            <h1 style={{ fontSize: "18px", fontWeight: "700", color: C.text, margin: 0 }}>My Expenses</h1>
+            <p style={{ fontSize: "12px", color: C.textMuted, margin: 0 }}>Track and manage your spending</p>
           </div>
         </div>
+        <button onClick={openAddModal} style={{
+          display: "flex", alignItems: "center", gap: "7px",
+          padding: "9px 18px", background: C.accent, color: "white",
+          border: "none", borderRadius: "9px", fontSize: "13px", fontWeight: "600", cursor: "pointer",
+        }}>
+          <Plus size={15} /> Add Expense
+        </button>
       </div>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div className="bg-white rounded-2xl p-6 shadow-xl border-2 border-purple-100 mb-8 hover:shadow-2xl transition-shadow duration-300">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative group">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={20} />
-              <input
-                type="text"
-                placeholder="Search by category or description..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all hover:border-purple-300"
-              />
-            </div>
-            <div className="relative group">
-              <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={20} />
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="appearance-none pl-12 pr-10 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all bg-white cursor-pointer font-medium hover:border-purple-300"
-              >
-                <option value="All">All Categories</option>
-                {categories.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </div>
+      <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px" }}>
+
+        {/* Search & Filter */}
+        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "12px", padding: "16px", marginBottom: "20px", display: "flex", gap: "12px" }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: C.textMuted }} />
+            <input type="text" placeholder="Search by category or description..." value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ ...inp, paddingLeft: "36px" }} />
+          </div>
+          <div style={{ position: "relative" }}>
+            <Filter size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: C.textMuted }} />
+            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}
+              style={{ ...inp, width: "auto", paddingLeft: "34px", paddingRight: "14px", cursor: "pointer" }}>
+              <option value="All">All Categories</option>
+              {categories.map(c => <option key={c}>{c}</option>)}
+            </select>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl p-6 shadow-2xl text-white transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-blue-100 text-sm font-medium">Total Expenses</div>
-              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                <TrendingDown size={20} />
+        {/* Stats Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "14px", marginBottom: "20px" }}>
+          {[
+            { label: "Total Expenses", value: filtered.length, sub: "Transactions", color: C.blue, bg: C.blueLight, border: C.blueBorder, icon: <TrendingDown size={18} color={C.blue} /> },
+            { label: "Total Amount", value: `₹${totalAmount.toFixed(2)}`, sub: "Spent this period", color: C.red, bg: C.redLight, border: C.redBorder, icon: <span style={{ fontSize: "16px", fontWeight: "700", color: C.red }}>₹</span> },
+            { label: "Categories", value: totalCategories, sub: "Active categories", color: C.accent, bg: C.accentLight, border: C.accentMid, icon: <Filter size={18} color={C.accent} /> },
+          ].map((s, i) => (
+            <div key={i} style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "12px", padding: "18px", display: "flex", alignItems: "center", gap: "14px" }}>
+              <div style={{ width: "44px", height: "44px", borderRadius: "11px", background: s.bg, border: `1px solid ${s.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {s.icon}
+              </div>
+              <div>
+                <p style={{ fontSize: "12px", color: C.textMuted, margin: "0 0 3px", fontWeight: "500" }}>{s.label}</p>
+                <p style={{ fontSize: "22px", fontWeight: "700", color: s.color, margin: "0 0 1px" }}>{s.value}</p>
+                <p style={{ fontSize: "11px", color: C.textMuted, margin: 0 }}>{s.sub}</p>
               </div>
             </div>
-            <div className="text-4xl font-bold mb-1">{filtered.length}</div>
-            <div className="text-blue-100 text-xs">Transactions</div>
-          </div>
-
-          <div className="bg-gradient-to-br from-red-500 via-pink-500 to-rose-600 rounded-2xl p-6 shadow-2xl text-white transform hover:scale-105 hover:rotate-1 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-red-100 text-sm font-medium">Total Amount</div>
-              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                <span className="text-2xl font-bold">₹</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold mb-1">₹{totalAmount.toFixed(2)}</div>
-            <div className="text-red-100 text-xs">Spent this period</div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-2xl p-6 shadow-2xl text-white transform hover:scale-105 hover:-rotate-1 transition-all duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-purple-100 text-sm font-medium">Categories</div>
-              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-                <Filter size={20} />
-              </div>
-            </div>
-            <div className="text-4xl font-bold mb-1">{totalCategories}</div>
-            <div className="text-purple-100 text-xs">Active categories</div>
-          </div>
+          ))}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl border-2 border-purple-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 px-6 py-4 border-b-2 border-purple-200">
-            <h2 className="text-xl font-bold text-gray-800">All Expenses</h2>
-            <p className="text-sm text-gray-600 mt-1">Your complete transaction history</p>
+        {/* Expense List */}
+        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "14px", overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.borderLight}` }}>
+            <h2 style={{ fontSize: "15px", fontWeight: "700", color: C.text, margin: "0 0 2px" }}>All Expenses</h2>
+            <p style={{ fontSize: "13px", color: C.textMuted, margin: 0 }}>Your complete transaction history</p>
           </div>
-
-          <div className="p-6">
+          <div style={{ padding: "16px" }}>
             {filtered.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="bg-gradient-to-br from-purple-100 to-pink-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                  <TrendingDown size={48} className="text-purple-500" />
-                </div>
-                <p className="text-gray-700 text-lg font-bold">No expenses found</p>
-                <p className="text-gray-500 text-sm mt-2">Try adjusting your search or filters</p>
+              <div style={{ textAlign: "center", padding: "56px 0" }}>
+                <TrendingDown size={40} color={C.border} style={{ margin: "0 auto 10px", display: "block" }} />
+                <p style={{ fontSize: "15px", fontWeight: "600", color: C.textSecondary, margin: "0 0 4px" }}>No expenses found</p>
+                <p style={{ fontSize: "13px", color: C.textMuted, margin: 0 }}>Try adjusting your search or filters</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {filtered.map((exp) => {
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {filtered.map(exp => {
                   const id = getId(exp);
-                  const colorClass = categoryColors[exp.category] || categoryColors.Other;
+                  const clr = categoryColors[exp.category] || categoryColors.Other;
                   const icon = categoryIcons[exp.category] || categoryIcons.Other;
-                  
                   return (
-                    <div
-                      key={id}
-                      className="bg-gradient-to-r from-gray-50 to-white hover:from-purple-50 hover:via-pink-50 hover:to-purple-50 rounded-2xl p-5 border-2 border-gray-200 hover:border-purple-300 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1"
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-2xl">{icon}</span>
-                            <span className={`px-4 py-1.5 rounded-full text-sm font-bold border-2 ${colorClass} shadow-md`}>
+                    <div key={id} style={{
+                      background: C.bg, border: `1px solid ${C.border}`,
+                      borderRadius: "12px", padding: "14px 16px",
+                      display: "flex", alignItems: "center", justifyContent: "space-between", gap: "14px",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
+                        <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: clr.bg, border: `1px solid ${clr.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", flexShrink: 0 }}>
+                          {icon}
+                        </div>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                            <span style={{ fontSize: "12px", fontWeight: "700", color: clr.color, background: clr.bg, border: `1px solid ${clr.border}`, padding: "2px 10px", borderRadius: "20px" }}>
                               {exp.category}
                             </span>
-                            <div className="flex items-center gap-1.5 text-gray-500">
-                              <Calendar size={14} />
-                              <span className="text-sm font-medium">
-  {exp.expenseDate
-    ? new Date(exp.expenseDate).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      })
-    : "-"}
-</span>
-
-                             
+                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                              <Calendar size={11} color={C.textMuted} />
+                              <span style={{ fontSize: "12px", color: C.textMuted }}>
+                                {exp.expenseDate ? new Date(exp.expenseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "-"}
+                              </span>
                             </div>
                           </div>
-                          {exp.description && (
-                            <p className="text-gray-700 text-sm leading-relaxed ml-11">{exp.description}</p>
-                          )}
+                          {exp.description && <p style={{ fontSize: "13px", color: C.textSecondary, margin: 0 }}>{exp.description}</p>}
                         </div>
-
-                        <div className="flex items-center gap-4">
-                          <div className="text-right bg-gradient-to-r from-red-50 to-pink-50 px-4 py-2 rounded-xl border-2 border-red-200">
-                            <div className="text-2xl font-black text-red-600">
-                              ₹{Number(exp.amount).toFixed(2)}
-                            </div>
-                          </div>
-
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleEdit(exp)}
-                              className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-110"
-                              title="Edit"
-                            >
-                              <Edit2 size={18} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(id)}
-                              className="p-3 bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-110"
-                              title="Delete"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ background: C.redLight, border: `1px solid ${C.redBorder}`, borderRadius: "9px", padding: "7px 14px", textAlign: "right" }}>
+                          <p style={{ fontSize: "16px", fontWeight: "700", color: C.red, margin: 0 }}>₹{Number(exp.amount).toFixed(2)}</p>
                         </div>
+                        <button onClick={() => handleEdit(exp)} style={{ width: "34px", height: "34px", borderRadius: "8px", background: C.blueLight, border: `1px solid ${C.blueBorder}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Edit2 size={14} color={C.blue} />
+                        </button>
+                        <button onClick={() => handleDelete(id)} style={{ width: "34px", height: "34px", borderRadius: "8px", background: C.redLight, border: `1px solid ${C.redBorder}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <Trash2 size={14} color={C.red} />
+                        </button>
                       </div>
                     </div>
                   );
@@ -425,118 +262,78 @@ const payload = {
         </div>
       </main>
 
+      {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex justify-center items-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-white">
-                    {isEditing ? "✏️ Edit Expense" : "➕ Add Expense"}
-                  </h2>
-                  <p className="text-purple-100 text-sm mt-1">
-                    {isEditing ? "Update your transaction details" : "Record your new expense"}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    setIsEditing(false);
-                  }}
-                  className="text-white hover:bg-white/20 p-2 rounded-xl transition-all hover:rotate-90 transform duration-300"
-                >
-                  <X size={24} />
-                </button>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: "16px" }}>
+          <div style={{ background: C.white, borderRadius: "16px", width: "100%", maxWidth: "440px", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
+            <div style={{ background: C.accent, padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <h2 style={{ fontSize: "17px", fontWeight: "700", color: "white", margin: "0 0 2px" }}>
+                  {isEditing ? "✏️ Edit Expense" : "➕ Add Expense"}
+                </h2>
+                <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.8)", margin: 0 }}>
+                  {isEditing ? "Update your transaction details" : "Record your new expense"}
+                </p>
               </div>
+              <button onClick={() => { setShowModal(false); setIsEditing(false); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "8px", padding: "6px", cursor: "pointer", display: "flex" }}>
+                <X size={18} color="white" />
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Amount <span className="text-red-500">*</span>
-                </label>
-                <div className="relative group">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold text-lg group-focus-within:text-purple-500 transition-colors">
-                    ₹
-                  </span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="100.00"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all font-bold text-lg hover:border-purple-300"
-                    required
-                  />
+            <form onSubmit={handleSubmit} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+              {[
+                { label: "Amount *", type: "number", placeholder: "100.00", step: "0.01", key: "amount", prefix: "₹" },
+              ].map(f => (
+                <div key={f.key}>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: C.textSecondary, marginBottom: "6px" }}>{f.label}</label>
+                  <div style={{ position: "relative" }}>
+                    <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", fontWeight: "700", color: C.textMuted }}>{f.prefix}</span>
+                    <input type={f.type} step={f.step} placeholder={f.placeholder} value={formData[f.key]}
+                      onChange={e => setFormData({ ...formData, [f.key]: e.target.value })}
+                      style={{ ...inp, paddingLeft: "30px" }} required />
+                  </div>
                 </div>
-              </div>
+              ))}
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Category <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all font-semibold bg-white cursor-pointer hover:border-purple-300"
-                  required
-                >
+                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: C.textSecondary, marginBottom: "6px" }}>Category *</label>
+                <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}
+                  style={{ ...inp, cursor: "pointer" }} required>
                   <option value="">Select Category</option>
-                  {categories.map((c) => (
-                   <option key={c} value={c}>{categoryIcons[c]} {c}</option>
-
-                  ))}
+                  {categories.map(c => <option key={c} value={c}>{categoryIcons[c]} {c}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Date <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all font-semibold hover:border-purple-300"
-                  required
-                />
+                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: C.textSecondary, marginBottom: "6px" }}>Date *</label>
+                <input type="date" value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })}
+                  style={inp} required />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  placeholder="Add notes about this expense..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none hover:border-purple-300"
-                  rows="3"
-                />
+                <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: C.textSecondary, marginBottom: "6px" }}>Description</label>
+                <textarea placeholder="Add notes about this expense..." value={formData.description}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  style={{ ...inp, resize: "none", height: "80px", paddingTop: "10px" }} rows={3} />
               </div>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className={`w-full py-4 rounded-xl text-white font-bold shadow-xl transition-all duration-300 text-lg ${
-                  saving
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105"
-                }`}
-              >
+              <button type="submit" disabled={saving} style={{
+                width: "100%", padding: "11px", borderRadius: "9px",
+                background: saving ? C.border : C.accent, color: "white",
+                border: "none", fontSize: "14px", fontWeight: "700", cursor: saving ? "not-allowed" : "pointer",
+              }}>
                 {saving ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                    <div style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "white", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
                     {isEditing ? "Updating..." : "Saving..."}
                   </span>
-                ) : (
-                  <span>{isEditing ? "💾 Update Expense" : "✅ Add Expense"}</span>
-                )}
+                ) : isEditing ? "💾 Update Expense" : "✅ Add Expense"}
               </button>
             </form>
           </div>
         </div>
       )}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };

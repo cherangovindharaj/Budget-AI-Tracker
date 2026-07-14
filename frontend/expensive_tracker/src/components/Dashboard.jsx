@@ -3,48 +3,48 @@ import React, { useState, useEffect } from "react";
 import IncomeManager from "./IncomeManager";
 import CommunityForum from './CommunityForum';
 import AIExpenseDashboard from './AIExpenseDashboard';
-
 import {
-  Wallet,
-  TrendingUp,
-  TrendingDown,
-  IndianRupee,
-  PieChart as PieIcon,
-  Trash2,
-  Search,
-  MessageSquare,
-  Sparkles,
-  X,
-  Lightbulb,
-  Activity,
-  AlertTriangle,
-  Zap,
-  ChevronRight
+  Wallet, TrendingUp, TrendingDown, IndianRupee,
+  PieChart as PieIcon, Trash2, Search, MessageSquare,
+  Sparkles, X, Lightbulb, Activity, AlertTriangle, Zap, ChevronRight
 } from "lucide-react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-  LineChart,
-  Line,
-  CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid,
 } from "recharts";
 import SavingsDashboard from './SavingsDashboard';
 
-// Category colors for pie chart - vibrant and distinct colors
 const dynamicColors = [
-  "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#C084FC",
-  "#F9A8D4", "#FDBA8C", "#A3E635", "#FBBF24", "#60A5FA",
-  "#34D399", "#F87171", "#F59E0B", "#8B5CF6", "#EC4899"
+  "#0ea5e9","#38bdf8","#7dd3fc","#0284c7","#0369a1",
+  "#06b6d4","#67e8f9","#22d3ee","#0891b2","#0e7490"
 ];
 
+// Arctic theme tokens
+const C = {
+  bg: "#f8fafc",
+  white: "#ffffff",
+  border: "#e2e8f0",
+  borderLight: "#f1f5f9",
+  accent: "#0ea5e9",
+  accentLight: "#f0f9ff",
+  accentMid: "#bae6fd",
+  text: "#0f172a",
+  textSecondary: "#64748b",
+  textMuted: "#94a3b8",
+  green: "#059669",
+  greenLight: "#d1fae5",
+  red: "#dc2626",
+  redLight: "#fee2e2",
+  blue: "#2563eb",
+  blueLight: "#dbeafe",
+};
+
+const card = {
+  background: C.white,
+  border: `1px solid ${C.border}`,
+  borderRadius: "12px",
+  padding: "20px",
+};
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -60,167 +60,94 @@ const Dashboard = () => {
   const [aiWidgetOpen, setAiWidgetOpen] = useState(false);
   const [activeAITab, setActiveAITab] = useState('tips');
   const [showFullAIDashboard, setShowFullAIDashboard] = useState(false);
+  const [stats, setStats] = useState({ totalExpenses: 0, categoryTotals: {} });
 
+  const categories = ["Food","Transport","Shopping","Bills","Entertainment","Health","Education","Savings","Other"];
 
-  const [stats, setStats] = useState({
-    totalExpenses: 0,
-    categoryTotals: {},
-  });
-
-  const categories = [
-    "Food",
-    "Transport",
-    "Shopping",
-    "Bills",
-    "Entertainment",
-    "Health",
-    "Education",
-    "Savings",
-    "Other",
-  ];
-
-  // AI Insights Data - Dynamic based on user's actual data
   const aiInsights = {
     tips: [
       stats.totalExpenses > 0 && Object.keys(stats.categoryTotals).length > 0
-        ? `Your ${Object.keys(stats.categoryTotals).sort((a, b) => stats.categoryTotals[b] - stats.categoryTotals[a])[0] || 'Food'} spending is your highest category. Consider budgeting ₹${Math.round(stats.totalExpenses * 0.15)}/week.`
+        ? `Your ${Object.keys(stats.categoryTotals).sort((a,b) => stats.categoryTotals[b]-stats.categoryTotals[a])[0]} spending is highest. Consider budgeting ₹${Math.round(stats.totalExpenses * 0.15)}/week.`
         : "Start tracking your expenses to get personalized tips!",
       totalIncome - stats.totalExpenses >= totalIncome * 0.2
         ? "Excellent! You're maintaining a healthy savings rate of over 20%."
         : "Try the 50-30-20 rule: 50% needs, 30% wants, 20% savings.",
-      expenses.length > 20 
-        ? "You have many transactions. Consider consolidating small purchases to save time."
+      expenses.length > 20
+        ? "You have many transactions. Consider consolidating small purchases."
         : "Keep tracking your expenses regularly for better insights."
     ].filter(Boolean),
     alerts: [
       stats.totalExpenses > totalIncome * 0.7 && totalIncome > 0
-        ? `You've spent ${((stats.totalExpenses / totalIncome) * 100).toFixed(0)}% of your income this month`
-        : null,
-      stats.totalExpenses > totalIncome && totalIncome > 0
-        ? "⚠️ Warning: Expenses exceed income!"
-        : null,
-      expenses.length > 50 
-        ? "High transaction volume detected this month" 
-        : null
+        ? `You've spent ${((stats.totalExpenses/totalIncome)*100).toFixed(0)}% of your income this month` : null,
+      stats.totalExpenses > totalIncome && totalIncome > 0 ? "⚠️ Warning: Expenses exceed income!" : null,
+      expenses.length > 50 ? "High transaction volume detected this month" : null
     ].filter(Boolean),
     health: {
-      status: totalIncome - stats.totalExpenses > totalIncome * 0.2 
-        ? "Excellent" 
-        : totalIncome - stats.totalExpenses > 0 
-        ? "Good" 
-        : "Needs Attention",
-      savingsRate: totalIncome > 0 
-        ? (((totalIncome - stats.totalExpenses) / totalIncome) * 100).toFixed(0) 
-        : 0,
-      emoji: totalIncome - stats.totalExpenses > totalIncome * 0.2 
-        ? "😊" 
-        : totalIncome - stats.totalExpenses > 0 
-        ? "😐" 
-        : "😟"
+      status: totalIncome - stats.totalExpenses > totalIncome*0.2 ? "Excellent" : totalIncome - stats.totalExpenses > 0 ? "Good" : "Needs Attention",
+      savingsRate: totalIncome > 0 ? (((totalIncome-stats.totalExpenses)/totalIncome)*100).toFixed(0) : 0,
+      emoji: totalIncome - stats.totalExpenses > totalIncome*0.2 ? "😊" : totalIncome - stats.totalExpenses > 0 ? "😐" : "😟"
     }
   };
 
   useEffect(() => {
     const token = sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
     const user = sessionStorage.getItem("user") || localStorage.getItem("user");
-
-    if (!token || !user) {
-      window.location.href = "/";
-      return;
-    }
-
+    if (!token || !user) { window.location.href = "/"; return; }
     const parsedUser = JSON.parse(user);
     setUserData(parsedUser);
     fetchExpenses(parsedUser.id);
     fetchIncomes(parsedUser.id);
   }, []);
 
-  useEffect(() => {
-    filterExpenses();
-  }, [expenses, searchTerm, filterCategory]);
+  useEffect(() => { filterExpenses(); }, [expenses, searchTerm, filterCategory]);
 
   const fetchExpenses = async (userId) => {
-    const response = await fetch(`${API_BASE_URL}/api/expenses/user/${userId}`);
-    const data = await response.json();
+    const res = await fetch(`${API_BASE_URL}/api/expenses/user/${userId}`);
+    const data = await res.json();
     setExpenses(Array.isArray(data) ? data : []);
     calculateStats(Array.isArray(data) ? data : []);
     calculateMonthlySpending(Array.isArray(data) ? data : []);
   };
 
   const fetchIncomes = async (userId) => {
-    const response = await fetch(`${API_BASE_URL}/api/incomes/user/${userId}`);
-    const data = await response.json();
-    const total = data.reduce((sum, income) => sum + parseFloat(income.amount || 0), 0);
-    setTotalIncome(total);
+    const res = await fetch(`${API_BASE_URL}/api/incomes/user/${userId}`);
+    const data = await res.json();
+    setTotalIncome(data.reduce((s, i) => s + parseFloat(i.amount || 0), 0));
   };
 
-  const calculateStats = (expenseList) => {
-    const total = expenseList.reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
-
+  const calculateStats = (list) => {
+    const total = list.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
     const categoryTotals = {};
-    expenseList.forEach((exp) => {
-      categoryTotals[exp.category] =
-        (categoryTotals[exp.category] || 0) + parseFloat(exp.amount || 0);
-    });
-
+    list.forEach(e => { categoryTotals[e.category] = (categoryTotals[e.category] || 0) + parseFloat(e.amount || 0); });
     setStats({ totalExpenses: total, categoryTotals });
   };
 
-  // Calculate monthly spending for last 6 months
-  const calculateMonthlySpending = (expenseList) => {
-    const monthlyTotals = {};
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
-    // Get last 6 months
+  const calculateMonthlySpending = (list) => {
+    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const today = new Date();
-    const last6Months = [];
-    
+    const months = [];
+    const totals = {};
     for (let i = 5; i >= 0; i--) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthLabel = `${monthNames[date.getMonth()]}`;
-      
-      last6Months.push({
-        key: monthKey,
-        label: monthLabel,
-        amount: 0
-      });
-      monthlyTotals[monthKey] = 0;
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      months.push({ key, label: names[d.getMonth()] });
+      totals[key] = 0;
     }
-
-    // Calculate spending for each month
-    expenseList.forEach((exp) => {
-      if (exp.date) {
-        const expDate = new Date(exp.date);
-        const monthKey = `${expDate.getFullYear()}-${String(expDate.getMonth() + 1).padStart(2, '0')}`;
-        
-        if (monthlyTotals.hasOwnProperty(monthKey)) {
-          monthlyTotals[monthKey] += parseFloat(exp.amount || 0);
-        }
+    list.forEach(e => {
+      if (e.expenseDate) {
+        const d = new Date(e.expenseDate);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        if (totals.hasOwnProperty(key)) totals[key] += parseFloat(e.amount || 0);
       }
     });
-
-    // Map to chart data
-    const chartData = last6Months.map(month => ({
-      month: month.label,
-      spending: parseFloat(monthlyTotals[month.key].toFixed(2))
-    }));
-
-    setMonthlyData(chartData);
+    setMonthlyData(months.map(m => ({ month: m.label, spending: parseFloat(totals[m.key].toFixed(2)) })));
   };
 
   const filterExpenses = () => {
-    let filtered = expenses;
-
-    if (filterCategory !== "All")
-      filtered = filtered.filter((exp) => exp.category === filterCategory);
-
-    if (searchTerm)
-      filtered = filtered.filter((exp) =>
-        exp.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-    setFilteredExpenses(filtered);
+    let f = expenses;
+    if (filterCategory !== "All") f = f.filter(e => e.category === filterCategory);
+    if (searchTerm) f = f.filter(e => e.description?.toLowerCase().includes(searchTerm.toLowerCase()));
+    setFilteredExpenses(f);
   };
 
   const handleDelete = async (id) => {
@@ -229,594 +156,368 @@ const Dashboard = () => {
     fetchExpenses(userData.id);
   };
 
-  const barData = [
-    { name: "This Month", Income: totalIncome, Expenses: stats.totalExpenses },
-  ];
+  const barData = [{ name: "This Month", Income: totalIncome, Expenses: stats.totalExpenses }];
+  const pieData = Object.entries(stats.categoryTotals).map(([name, value]) => ({ name, value }));
 
-  // Group by category for pie chart
-  const pieData = Object.entries(stats.categoryTotals).map(([category, amount]) => ({
-    name: category,
-    value: amount,
-  }));
-
-  // Custom label with percentage only
-  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     if (percent < 0.05) return null;
-    
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
+    const R = Math.PI / 180;
+    const r = innerRadius + (outerRadius - innerRadius) * 0.5;
     return (
-      <text
-        x={x}
-        y={y}
-        fill="white"
-        textAnchor="middle"
-        dominantBaseline="central"
-        className="font-bold text-sm"
-      >
+      <text x={cx + r * Math.cos(-midAngle * R)} y={cy + r * Math.sin(-midAngle * R)}
+        fill="white" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={600}>
         {`${(percent * 100).toFixed(1)}%`}
       </text>
     );
   };
-  // Calculate current month spending and percentage change
-  const currentMonthSpending = monthlyData.length > 0 
-    ? parseFloat(monthlyData[monthlyData.length - 1].spending.toFixed(2))
-    : 0;
-  
-  const previousMonthSpending = monthlyData.length > 1 
-    ? parseFloat(monthlyData[monthlyData.length - 2].spending.toFixed(2))
-    : 0;
-  
-  const percentageChange = previousMonthSpending > 0 
-    ? (((currentMonthSpending - previousMonthSpending) / previousMonthSpending) * 100).toFixed(0)
-    : 0;
 
-  // Handler for opening Full AI Dashboard
-  const handleOpenFullAI = () => {
-    console.log('Opening Full AI Dashboard'); // Debug log
-    setAiWidgetOpen(false);
-    setShowFullAIDashboard(true);
-  };
+  const cur = monthlyData.length > 0 ? monthlyData[monthlyData.length-1].spending : 0;
+  const prev = monthlyData.length > 1 ? monthlyData[monthlyData.length-2].spending : 0;
+  const pct = prev > 0 ? (((cur - prev) / prev) * 100).toFixed(0) : 0;
+
+  const fmt = (v) => v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="px-6 py-4 flex items-center gap-3">
-          <div className="bg-gradient-to-r from-purple-600 to-pink-500 p-2 rounded-lg">
-            <Wallet className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Budget AI</h1>
+    <div style={{ minHeight: "100vh", background: C.bg }}>
+      {/* Header */}
+      <header style={{ background: C.white, borderBottom: `1px solid ${C.border}`, padding: "14px 24px", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ background: C.accent, padding: "7px", borderRadius: "9px", display: "flex" }}>
+          <Wallet size={18} color="white" />
         </div>
+        <h1 style={{ fontSize: "17px", fontWeight: "700", color: C.text, margin: 0 }}>Budget AI</h1>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <h2 className="text-3xl font-bold mb-6">Welcome back, {userData?.username}!</h2>
-        <div className="mb-8 flex justify-end">
-          <button
-            onClick={() => setShowIncomeManager(true)}
-            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-bold flex items-center gap-3 text-base"
-          >
-            <TrendingUp className="w-5 h-5" />
-            Manage Income
-          </button>
-          <button
-            onClick={() => setShowCommunityForum(true)}
-            className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-bold flex items-center gap-3 text-base ml-4"
-          >
-            <MessageSquare className="w-5 h-5" />
-            Community Forum
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <SummaryCard Icon={TrendingUp} title="Income" value={totalIncome} color="green" />
-          <SummaryCard Icon={TrendingDown} title="Expenses" value={stats.totalExpenses} color="red" />
-          <SummaryCard Icon={IndianRupee} title="Balance" value={totalIncome - stats.totalExpenses} color="blue" />
-          <SummaryCard Icon={PieIcon} title="Transactions" value={expenses.length} color="purple" />
-        </div>
-
-        <div className="mb-8 flex justify-end">
-          <button
-            onClick={() => setShowSavingsDashboard(true)}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-semibold flex items-center gap-2"
-          >
-            📊 View Savings Dashboard
-          </button>
-        </div>
-        {showIncomeManager && userData && (
-          <IncomeManager
-            userId={userData.id}
-            onClose={() => setShowIncomeManager(false)}
-            onIncomeAdded={() => fetchIncomes(userData.id)}
-          />
-        )}
-
-        {/* Monthly Spending Graph */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border mb-8">
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-gray-800">Monthly Spending</h3>
-            <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-3xl font-bold text-gray-900">₹{currentMonthSpending.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-              <span className={`text-sm font-semibold px-2 py-1 rounded ${
-                percentageChange >= 0 ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50'
-              }`}>
-                {percentageChange >= 0 ? '+' : ''}{percentageChange}%
-              </span>
-            </div>
-            <p className="text-sm text-gray-500 mt-1">Last 6 Months</p>
+      <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "28px 24px" }}>
+        {/* Welcome */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+          <div>
+            <h2 style={{ fontSize: "22px", fontWeight: "700", color: C.text, margin: 0 }}>Welcome back, {userData?.username}! 👋</h2>
+            <p style={{ color: C.textMuted, fontSize: "14px", margin: "4px 0 0" }}>Here's your financial overview</p>
           </div>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button onClick={() => setShowIncomeManager(true)} style={{
+              display: "flex", alignItems: "center", gap: "7px",
+              padding: "9px 16px", background: C.accent, color: "white",
+              border: "none", borderRadius: "9px", fontSize: "13px", fontWeight: "600", cursor: "pointer",
+            }}>
+              <TrendingUp size={15} /> Manage Income
+            </button>
+            <button onClick={() => setShowCommunityForum(true)} style={{
+              display: "flex", alignItems: "center", gap: "7px",
+              padding: "9px 16px", background: C.white, color: C.text,
+              border: `1px solid ${C.border}`, borderRadius: "9px", fontSize: "13px", fontWeight: "600", cursor: "pointer",
+            }}>
+              <MessageSquare size={15} /> Community
+            </button>
+            <button onClick={() => setShowSavingsDashboard(true)} style={{
+              display: "flex", alignItems: "center", gap: "7px",
+              padding: "9px 16px", background: C.white, color: C.text,
+              border: `1px solid ${C.border}`, borderRadius: "9px", fontSize: "13px", fontWeight: "600", cursor: "pointer",
+            }}>
+              📊 Savings
+            </button>
+          </div>
+        </div>
 
-          <ResponsiveContainer width="100%" height={200}>
+        {/* Summary Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "14px", marginBottom: "20px" }}>
+          {[
+            { label: "Total Income", value: `₹${fmt(totalIncome)}`, color: C.green, bg: C.greenLight, icon: <TrendingUp size={18} color={C.green} /> },
+            { label: "Total Expenses", value: `₹${fmt(stats.totalExpenses)}`, color: C.red, bg: C.redLight, icon: <TrendingDown size={18} color={C.red} /> },
+            { label: "Balance", value: `₹${fmt(totalIncome - stats.totalExpenses)}`, color: C.accent, bg: C.accentLight, icon: <IndianRupee size={18} color={C.accent} /> },
+            { label: "Transactions", value: expenses.length, color: "#7c3aed", bg: "#f5f3ff", icon: <PieIcon size={18} color="#7c3aed" /> },
+          ].map((s, i) => (
+            <div key={i} style={{ ...card, display: "flex", alignItems: "center", gap: "14px" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {s.icon}
+              </div>
+              <div>
+                <p style={{ fontSize: "12px", color: C.textMuted, margin: "0 0 3px", fontWeight: "500" }}>{s.label}</p>
+                <p style={{ fontSize: "18px", fontWeight: "700", color: s.color, margin: 0 }}>{s.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Monthly Spending */}
+        <div style={{ ...card, marginBottom: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+            <div>
+              <p style={{ fontSize: "13px", color: C.textMuted, margin: "0 0 4px", fontWeight: "500" }}>Monthly Spending</p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+                <span style={{ fontSize: "26px", fontWeight: "700", color: C.text }}>₹{fmt(cur)}</span>
+                <span style={{
+                  fontSize: "12px", fontWeight: "600", padding: "2px 8px", borderRadius: "20px",
+                  background: pct >= 0 ? C.redLight : C.greenLight,
+                  color: pct >= 0 ? C.red : C.green,
+                }}>
+                  {pct >= 0 ? "+" : ""}{pct}%
+                </span>
+              </div>
+              <p style={{ fontSize: "12px", color: C.textMuted, margin: "3px 0 0" }}>Last 6 months</p>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={190}>
             <LineChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis 
-                dataKey="month" 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={{ stroke: '#d1d5db' }}
-              />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={{ stroke: '#d1d5db' }}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#fff', 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                }}
-                formatter={(value) => [`₹${parseFloat(value).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, 'Spending']}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="spending" 
-                stroke="#c29544"
-                strokeWidth={2}
-                dot={{ fill: '#c29544', r: 4 }}
-                activeDot={{ r: 6 }}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.borderLight} />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: C.textMuted }} axisLine={{ stroke: C.border }} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: C.textMuted }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "10px", fontSize: "13px" }}
+                formatter={v => [`₹${fmt(parseFloat(v))}`, 'Spending']} />
+              <Line type="monotone" dataKey="spending" stroke={C.accent} strokeWidth={2.5}
+                dot={{ fill: C.accent, r: 4, strokeWidth: 0 }} activeDot={{ r: 6, strokeWidth: 0 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Income vs Expenses Bar Chart */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border">
-            <h3 className="text-xl font-bold mb-4">Income vs Expenses</h3>
-            <ResponsiveContainer width="65%" height={300}>    
-              <BarChart data={barData}>
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip 
-                  formatter={(value) => `₹${parseFloat(value).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
-                />
-                <Bar
-                  dataKey="Income"
-                  fill="#16a34a"
-                  radius={[8, 8, 0, 0]}
-                />
-                <Bar
-                  dataKey="Expenses"
-                  fill="#dc2626"
-                  radius={[8, 8, 0, 0]}
-                />
+        {/* Charts Row */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "20px" }}>
+          {/* Bar Chart */}
+          <div style={card}>
+            <p style={{ fontSize: "14px", fontWeight: "600", color: C.text, margin: "0 0 16px" }}>Income vs Expenses</p>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={barData} barSize={48}>
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: C.textMuted }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: C.textMuted }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "10px", fontSize: "13px" }}
+                  formatter={v => `₹${fmt(parseFloat(v))}`} />
+                <Bar dataKey="Income" fill={C.green} radius={[7,7,0,0]} />
+                <Bar dataKey="Expenses" fill={C.red} radius={[7,7,0,0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Spending Breakdown Pie Chart */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border">
-            <h3 className="text-xl font-bold mb-4">Spending by Category</h3>
+          {/* Pie Chart */}
+          <div style={card}>
+            <p style={{ fontSize: "14px", fontWeight: "600", color: C.text, margin: "0 0 16px" }}>Spending by Category</p>
             {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={240}>
                 <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={90}
-                    labelLine={false}
-                    label={renderCustomLabel}
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={dynamicColors[index % dynamicColors.length]}
-                        stroke="#ffffff"
-                        strokeWidth={3}
-                      />
-                    ))}
+                  <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={85} labelLine={false} label={renderCustomLabel}>
+                    {pieData.map((_, i) => <Cell key={i} fill={dynamicColors[i % dynamicColors.length]} stroke="white" strokeWidth={2} />)}
                   </Pie>
-                  <Legend 
-                    verticalAlign="bottom" 
-                    height={50}
-                    wrapperStyle={{ paddingTop: '15px' }}
-                    formatter={(value, entry) => {
-                      const percent = ((entry.payload.value / stats.totalExpenses) * 100).toFixed(1);
-                      return (
-                        <span style={{ color: '#374151', fontSize: '13px', fontWeight: 600 }}>
-                          {value} ({percent}%)
-                        </span>
-                      );
-                    }}
-                    iconType="circle"
-                    iconSize={10}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                      padding: '8px 12px'
-                    }}
-                    formatter={(value, name) => {
-                      const percent = ((value / stats.totalExpenses) * 100).toFixed(1);
-                      return [`₹${parseFloat(value).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${percent}%)`, name];
-                    }}
-                  />
+                  <Legend verticalAlign="bottom" height={40}
+                    formatter={(v, e) => <span style={{ fontSize: "12px", color: C.textSecondary }}>{v} ({((e.payload.value/stats.totalExpenses)*100).toFixed(1)}%)</span>}
+                    iconType="circle" iconSize={8} />
+                  <Tooltip contentStyle={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "10px", fontSize: "13px" }}
+                    formatter={(v, n) => [`₹${fmt(parseFloat(v))} (${((v/stats.totalExpenses)*100).toFixed(1)}%)`, n]} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-center py-12 text-gray-500">
-                <p className="text-lg font-semibold">No expenses yet</p>
-                <p className="text-sm mt-2">Add some expenses to see the breakdown</p>
+              <div style={{ textAlign: "center", padding: "50px 0", color: C.textMuted }}>
+                <p style={{ fontSize: "14px", fontWeight: "500" }}>No expenses yet</p>
+                <p style={{ fontSize: "12px", marginTop: "4px" }}>Add expenses to see breakdown</p>
               </div>
             )}
           </div>
         </div>
 
-        <ExpenseList
-          filteredExpenses={filteredExpenses}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          setFilterCategory={setFilterCategory}
-          handleDelete={handleDelete}
-          categories={categories}
-        />
-      </main>
-
-      {showSavingsDashboard && userData && (
-        <SavingsDashboard 
-          userId={userData.id} 
-          onClose={() => setShowSavingsDashboard(false)} 
-        />
-      )}
-
-      {showCommunityForum && userData && (
-        <CommunityForum
-          userData={userData}
-          onClose={() => setShowCommunityForum(false)}
-        />
-      )}
-
-      {showFullAIDashboard && userData && (
-        <AIExpenseDashboard
-          userData={userData}
-          expenses={expenses}
-          totalIncome={totalIncome}
-          stats={stats}
-          onClose={() => setShowFullAIDashboard(false)}
-        />
-      )}
-
-      {/* FLOATING AI WIDGET */}
-      <div className="fixed bottom-6 right-6 z-50">
-        {!aiWidgetOpen ? (
-          <button
-            onClick={() => setAiWidgetOpen(true)}
-            className="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:shadow-purple-500/50 hover:scale-110 transition-all duration-300 group"
-          >
-            <Sparkles className="w-8 h-8 animate-pulse" />
-            {aiInsights.alerts.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-bounce">
-                {aiInsights.alerts.length}
-              </span>
-            )}
-            <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              AI Insights Available
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full border-8 border-transparent border-l-gray-900"></div>
+        {/* Expense List */}
+        <div style={card}>
+          <p style={{ fontSize: "14px", fontWeight: "600", color: C.text, margin: "0 0 14px" }}>Recent Expenses</p>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "14px" }}>
+            <div style={{ position: "relative", flex: 1 }}>
+              <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: C.textMuted }} />
+              <input type="text" placeholder="Search expenses..." value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{
+                  width: "100%", padding: "9px 12px 9px 36px",
+                  border: `1px solid ${C.border}`, borderRadius: "9px",
+                  fontSize: "13px", color: C.text, background: C.white, outline: "none",
+                }} />
             </div>
-          </button>
-        ) : (
-          <div className="bg-white rounded-2xl shadow-2xl w-96 max-h-[600px] overflow-hidden border-2 border-purple-200 animate-slideIn">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-lg">
-                  <Sparkles className="w-5 h-5" />
+            <select onChange={e => setFilterCategory(e.target.value)}
+              style={{
+                padding: "9px 14px", border: `1px solid ${C.border}`, borderRadius: "9px",
+                fontSize: "13px", color: C.text, background: C.white, outline: "none", cursor: "pointer",
+              }}>
+              <option value="All">All Categories</option>
+              {categories.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+
+          <div style={{ maxHeight: "360px", overflowY: "auto" }}>
+            {filteredExpenses.length > 0 ? filteredExpenses.map(exp => (
+              <div key={exp.id} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "12px 8px", borderBottom: `1px solid ${C.borderLight}`,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div style={{
+                    width: "36px", height: "36px", borderRadius: "9px",
+                    background: C.accentLight, display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "14px", flexShrink: 0,
+                  }}>
+                    {exp.category === "Food" ? "🍔" : exp.category === "Transport" ? "🚗" : exp.category === "Shopping" ? "🛍️" : exp.category === "Bills" ? "📄" : exp.category === "Health" ? "💊" : exp.category === "Education" ? "📚" : exp.category === "Savings" ? "💰" : exp.category === "Entertainment" ? "🎬" : "📦"}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "13px", fontWeight: "600", color: C.text, margin: 0 }}>{exp.category}</p>
+                    <p style={{ fontSize: "12px", color: C.textMuted, margin: "2px 0 0" }}>{exp.description || "No description"}</p>
+                    <p style={{ fontSize: "11px", color: C.textMuted, margin: "1px 0 0" }}>
+                      {exp.expenseDate ? new Date(exp.expenseDate).toLocaleDateString("en-IN") : "-"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-lg">AI Assistant</h3>
-                  <p className="text-xs text-blue-100">Smart Financial Insights</p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <p style={{ fontSize: "15px", fontWeight: "700", color: C.red, margin: 0 }}>₹{parseFloat(exp.amount).toFixed(2)}</p>
+                  <button onClick={() => handleDelete(exp.id)} style={{
+                    width: "32px", height: "32px", borderRadius: "8px", border: `1px solid ${C.border}`,
+                    background: C.white, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Trash2 size={14} color={C.red} />
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={() => setAiWidgetOpen(false)}
-                className="hover:bg-white/20 p-2 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
+            )) : (
+              <div style={{ textAlign: "center", padding: "48px 0", color: C.textMuted }}>
+                <TrendingDown size={36} color={C.border} style={{ margin: "0 auto 8px", display: "block" }} />
+                <p style={{ fontWeight: "500" }}>No expenses found</p>
+                <p style={{ fontSize: "13px", marginTop: "4px" }}>Try adjusting your filters</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {showSavingsDashboard && userData && <SavingsDashboard userId={userData.id} onClose={() => setShowSavingsDashboard(false)} />}
+      {showIncomeManager && userData && <IncomeManager userId={userData.id} onClose={() => setShowIncomeManager(false)} onIncomeAdded={() => fetchIncomes(userData.id)} />}
+      {showCommunityForum && userData && <CommunityForum userData={userData} onClose={() => setShowCommunityForum(false)} />}
+      {showFullAIDashboard && userData && <AIExpenseDashboard userData={userData} expenses={expenses} totalIncome={totalIncome} stats={stats} onClose={() => setShowFullAIDashboard(false)} />}
+
+      {/* AI Widget */}
+      <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 50 }}>
+        {!aiWidgetOpen ? (
+          <button onClick={() => setAiWidgetOpen(true)} style={{
+            width: "52px", height: "52px", borderRadius: "50%",
+            background: C.accent, border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 16px rgba(14,165,233,0.35)",
+          }}>
+            <Sparkles size={22} color="white" />
+            {aiInsights.alerts.length > 0 && (
+              <span style={{
+                position: "absolute", top: "-4px", right: "-4px",
+                background: C.red, color: "white", fontSize: "10px", fontWeight: "700",
+                borderRadius: "50%", width: "18px", height: "18px",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>{aiInsights.alerts.length}</span>
+            )}
+          </button>
+        ) : (
+          <div style={{
+            width: "340px", background: C.white, borderRadius: "16px",
+            border: `1px solid ${C.border}`, overflow: "hidden",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
+          }}>
+            <div style={{ background: C.accent, padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Sparkles size={18} color="white" />
+                <div>
+                  <p style={{ fontSize: "14px", fontWeight: "700", color: "white", margin: 0 }}>AI Assistant</p>
+                  <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", margin: 0 }}>Smart Financial Insights</p>
+                </div>
+              </div>
+              <button onClick={() => setAiWidgetOpen(false)} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: "7px", padding: "5px", cursor: "pointer", display: "flex" }}>
+                <X size={16} color="white" />
               </button>
             </div>
 
-            <div className="flex border-b bg-gray-50">
-              <WidgetTab
-                active={activeAITab === 'tips'}
-                onClick={() => setActiveAITab('tips')}
-                icon={<Lightbulb className="w-4 h-4" />}
-                label="Tips"
-                badge={aiInsights.tips.length}
-              />
-              <WidgetTab
-                active={activeAITab === 'alerts'}
-                onClick={() => setActiveAITab('alerts')}
-                icon={<AlertTriangle className="w-4 h-4" />}
-                label="Alerts"
-                badge={aiInsights.alerts.length}
-              />
-              <WidgetTab
-                active={activeAITab === 'health'}
-                onClick={() => setActiveAITab('health')}
-                icon={<Activity className="w-4 h-4" />}
-                label="Health"
-              />
+            <div style={{ display: "flex", borderBottom: `1px solid ${C.border}` }}>
+              {[
+                { id: 'tips', label: 'Tips', icon: <Lightbulb size={13} />, badge: aiInsights.tips.length },
+                { id: 'alerts', label: 'Alerts', icon: <AlertTriangle size={13} />, badge: aiInsights.alerts.length },
+                { id: 'health', label: 'Health', icon: <Activity size={13} /> },
+              ].map(t => (
+                <button key={t.id} onClick={() => setActiveAITab(t.id)} style={{
+                  flex: 1, padding: "10px 6px", border: "none", cursor: "pointer",
+                  fontSize: "12px", fontWeight: "600", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
+                  background: activeAITab === t.id ? C.white : C.bg,
+                  color: activeAITab === t.id ? C.accent : C.textMuted,
+                  borderBottom: activeAITab === t.id ? `2px solid ${C.accent}` : "2px solid transparent",
+                  position: "relative",
+                }}>
+                  {t.icon}{t.label}
+                  {t.badge > 0 && <span style={{ background: C.red, color: "white", fontSize: "9px", borderRadius: "50%", width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{t.badge}</span>}
+                </button>
+              ))}
             </div>
 
-            <div className="p-4 overflow-y-auto max-h-[420px]">
+            <div style={{ padding: "14px", maxHeight: "320px", overflowY: "auto" }}>
               {activeAITab === 'tips' && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Zap className="w-5 h-5 text-purple-600" />
-                    <h4 className="font-bold text-gray-800">Smart Saving Tips</h4>
-                  </div>
-                  {aiInsights.tips.map((tip, idx) => (
-                    <div key={idx} className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200 hover:shadow-md transition-shadow">
-                      <div className="flex gap-3">
-                        <span className="text-2xl">💡</span>
-                        <p className="text-sm text-gray-700 flex-1">{tip}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {aiInsights.tips.map((tip, i) => (
+                    <div key={i} style={{ background: C.accentLight, border: `1px solid ${C.accentMid}`, borderRadius: "10px", padding: "12px" }}>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <Zap size={16} color={C.accent} style={{ flexShrink: 0, marginTop: "2px" }} />
+                        <p style={{ fontSize: "13px", color: C.text, margin: 0, lineHeight: "1.5" }}>{tip}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-
               {activeAITab === 'alerts' && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-4">
-                    <AlertTriangle className="w-5 h-5 text-orange-600" />
-                    <h4 className="font-bold text-gray-800">Spending Alerts</h4>
-                  </div>
-                  {aiInsights.alerts.length > 0 ? (
-                    <>
-                      {aiInsights.alerts.map((alert, idx) => (
-                        <div key={idx} className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-xl border border-orange-200 hover:shadow-md transition-shadow">
-                          <div className="flex gap-3">
-                            <span className="text-2xl">⚠️</span>
-                            <p className="text-sm text-gray-700 flex-1">{alert}</p>
-                          </div>
-                        </div>
-                      ))}
-                      {stats.totalExpenses > 0 && (
-                        <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                          <div className="flex justify-between text-sm mb-2">
-                            <span className="text-gray-600">Budget Used</span>
-                            <span className="font-bold text-orange-900">
-                              {totalIncome > 0 ? ((stats.totalExpenses / totalIncome) * 100).toFixed(0) : 0}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-orange-500 h-2 rounded-full transition-all" 
-                              style={{width: `${Math.min(100, totalIncome > 0 ? (stats.totalExpenses / totalIncome) * 100 : 0)}%`}}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <span className="text-4xl mb-2 block">✅</span>
-                      <p className="font-semibold">All Good!</p>
-                      <p className="text-sm">No spending alerts</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {aiInsights.alerts.length > 0 ? aiInsights.alerts.map((a, i) => (
+                    <div key={i} style={{ background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "10px", padding: "12px" }}>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <AlertTriangle size={16} color="#f97316" style={{ flexShrink: 0 }} />
+                        <p style={{ fontSize: "13px", color: C.text, margin: 0 }}>{a}</p>
+                      </div>
+                    </div>
+                  )) : (
+                    <div style={{ textAlign: "center", padding: "24px 0", color: C.textMuted }}>
+                      <p style={{ fontSize: "24px", margin: "0 0 6px" }}>✅</p>
+                      <p style={{ fontWeight: "500", fontSize: "14px" }}>All Good!</p>
+                      <p style={{ fontSize: "12px" }}>No spending alerts</p>
                     </div>
                   )}
                 </div>
               )}
-
               {activeAITab === 'health' && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Activity className="w-5 h-5 text-green-600" />
-                    <h4 className="font-bold text-gray-800">Financial Health</h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div style={{ background: C.accentLight, border: `1px solid ${C.accentMid}`, borderRadius: "10px", padding: "16px", textAlign: "center" }}>
+                    <p style={{ fontSize: "36px", margin: "0 0 6px" }}>{aiInsights.health.emoji}</p>
+                    <p style={{ fontSize: "18px", fontWeight: "700", color: C.accent, margin: "0 0 2px" }}>{aiInsights.health.status}</p>
+                    <p style={{ fontSize: "12px", color: C.textMuted, margin: 0 }}>Financial health</p>
                   </div>
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 text-center">
-                    <span className="text-5xl mb-3 block">{aiInsights.health.emoji}</span>
-                    <h3 className="text-2xl font-bold text-green-900 mb-1">{aiInsights.health.status}</h3>
-                    <p className="text-sm text-gray-600">Your financial status</p>
+                  <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: "10px", padding: "14px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                      <span style={{ fontSize: "13px", color: C.textSecondary }}>Savings Rate</span>
+                      <span style={{ fontSize: "15px", fontWeight: "700", color: C.accent }}>{aiInsights.health.savingsRate}%</span>
+                    </div>
+                    <div style={{ background: C.borderLight, borderRadius: "4px", height: "6px" }}>
+                      <div style={{ width: `${Math.min(100, Math.max(0, aiInsights.health.savingsRate))}%`, height: "100%", background: C.accent, borderRadius: "4px" }} />
+                    </div>
+                    <p style={{ fontSize: "11px", color: C.textMuted, margin: "6px 0 0" }}>Target: 20% • {aiInsights.health.savingsRate >= 20 ? "Great job! 🎉" : "Keep going! 💪"}</p>
                   </div>
-                  <div className="bg-white border-2 border-green-200 p-4 rounded-xl">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-semibold text-gray-700">Savings Rate</span>
-                      <span className="text-xl font-bold text-green-600">{aiInsights.health.savingsRate}%</span>
+                  {[
+                    { label: "Monthly Income", val: `₹${fmt(totalIncome)}` },
+                    { label: "Total Expenses", val: `₹${fmt(stats.totalExpenses)}` },
+                    { label: "Net Savings", val: `₹${fmt(totalIncome - stats.totalExpenses)}`, highlight: true },
+                  ].map((r, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "10px 12px", background: C.bg, borderRadius: "8px" }}>
+                      <span style={{ fontSize: "13px", color: C.textSecondary }}>{r.label}</span>
+                      <span style={{ fontSize: "13px", fontWeight: "700", color: r.highlight ? (totalIncome - stats.totalExpenses >= 0 ? C.green : C.red) : C.text }}>{r.val}</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-                      <div 
-                        className="bg-gradient-to-r from-green-400 to-emerald-500 h-3 rounded-full transition-all" 
-                        style={{width: `${Math.min(100, Math.max(0, aiInsights.health.savingsRate))}%`}}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      Target: 20% • {aiInsights.health.savingsRate >= 20 ? "Great job! 🎉" : "Keep going! 💪"}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="text-sm text-gray-600">Monthly Income</span>
-                      <span className="font-bold text-green-900">₹{totalIncome.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="text-sm text-gray-600">Total Expenses</span>
-                      <span className="font-bold text-green-900">₹{stats.totalExpenses.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="text-sm text-gray-600">Net Savings</span>
-                      <span className={`font-bold ${totalIncome - stats.totalExpenses >= 0 ? 'text-green-900' : 'text-red-600'}`}>
-                        ₹{(totalIncome - stats.totalExpenses).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                      </span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
             </div>
 
-            <div className="p-4 border-t bg-gray-50">
-              <button 
-                onClick={handleOpenFullAI}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
-              >
-                <span>Open Full AI Dashboard</span>
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <div style={{ padding: "12px 14px", borderTop: `1px solid ${C.border}` }}>
+              <button onClick={() => { setAiWidgetOpen(false); setShowFullAIDashboard(true); }} style={{
+                width: "100%", padding: "10px", background: C.accent, color: "white",
+                border: "none", borderRadius: "9px", fontSize: "13px", fontWeight: "600", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+              }}>
+                Open Full AI Dashboard <ChevronRight size={15} />
               </button>
             </div>
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        .animate-slideIn {
-          animation: slideIn 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 };
-
-const SummaryCard = ({ Icon, title, value, color }) => {
-  const colorClasses = {
-    green: "text-green-600",
-    red: "text-red-600",
-    blue: "text-blue-600",
-    purple: "text-purple-600"
-  };
-
-  const formatValue = (val) => {
-    if (typeof val === 'number') {
-      if (title === 'Transactions') return val; // Don't add decimal to transaction count
-      return `₹${val.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    }
-    return val;
-  };
-
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border hover:shadow-xl transition-shadow">
-      <div className="flex justify-between items-center mb-2">
-        <Icon className={colorClasses[color]} size={24} />
-        <span className="text-gray-600 text-sm font-medium">{title}</span>
-      </div>
-      <p className={`text-2xl font-bold ${colorClasses[color]} mt-2`}>
-        {formatValue(value)}
-      </p>
-    </div>
-  );
-};
-
-const ExpenseList = ({
-  filteredExpenses,
-  searchTerm,
-  setSearchTerm,
-  setFilterCategory,
-  handleDelete,
-  categories,
-}) => (
-  <div className="bg-white p-6 rounded-xl shadow-lg border">
-    <h3 className="text-xl font-bold mb-4">Recent Expenses</h3>
-    <div className="flex gap-4 mb-4">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-3 text-gray-400" size={18} />
-        <input
-          type="text"
-          placeholder="Search expenses..."
-          className="w-full pl-10 border-2 border-gray-200 p-2.5 rounded-lg focus:border-purple-500 focus:outline-none"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      <select 
-        className="border-2 border-gray-200 p-2.5 rounded-lg focus:border-purple-500 focus:outline-none font-medium" 
-        onChange={(e) => setFilterCategory(e.target.value)}
-      >
-        <option value="All">All Categories</option>
-        {categories.map((c) => (
-          <option key={c}>{c}</option>
-        ))}
-      </select>
-    </div>
-
-    <div className="max-h-96 overflow-y-auto">
-      {filteredExpenses.length > 0 ? (
-        filteredExpenses.map((expense) => (
-          <div key={expense.id} className="flex justify-between items-center py-3 border-b hover:bg-gray-50 px-2 rounded transition-colors">
-            <div>
-              <span className="font-semibold text-gray-800">{expense.category}</span>
-              <p className="text-gray-500 text-sm">{expense.description || 'No description'}</p>
-              <p className="text-gray-400 text-xs">
-                {expense.expenseDate ? new Date(expense.expenseDate).toLocaleDateString("en-IN") : "-"}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <p className="text-red-600 font-bold text-lg">₹{parseFloat(expense.amount).toFixed(2)}</p>
-              <button 
-                onClick={() => handleDelete(expense.id)}
-                className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <Trash2 className="text-red-600" size={18} />
-              </button>
-            </div>
-          </div>
-        ))
-      ) : (
-        <div className="text-center py-12 text-gray-500">
-          <TrendingDown size={48} className="mx-auto mb-3 text-gray-300" />
-          <p className="font-semibold">No expenses found</p>
-          <p className="text-sm mt-1">Try adjusting your filters</p>
-        </div>
-      )}
-    </div>
-  </div>
-);
-
-const WidgetTab = ({ active, onClick, icon, label, badge }) => (
-  <button
-    onClick={onClick}
-    className={`flex-1 py-3 px-2 text-sm font-semibold transition-all flex items-center justify-center gap-1 relative ${
-      active
-        ? 'bg-white text-purple-600 border-b-2 border-purple-600'
-        : 'text-gray-600 hover:bg-gray-100'
-    }`}
-  >
-    {icon}
-    <span>{label}</span>
-    {badge > 0 && (
-      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-        {badge}
-      </span>
-    )}
-  </button>
-);
 
 export default Dashboard;
