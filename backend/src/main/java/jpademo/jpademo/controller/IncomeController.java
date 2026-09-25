@@ -11,7 +11,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/incomes")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(originPatterns = "*")
 public class IncomeController {
     
     @Autowired

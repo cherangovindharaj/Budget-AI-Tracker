@@ -21,7 +21,7 @@ import jpademo.jpademo.model.repository.ForumPostRepository;
 
 @RestController
 @RequestMapping("/api/forum")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class ForumController {
 
     private final ForumPostRepository repo;

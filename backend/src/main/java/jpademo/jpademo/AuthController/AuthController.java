@@ -20,7 +20,7 @@ import jpademo.jpademo.model.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(originPatterns = "*")
 public class AuthController {
     
     @Autowired

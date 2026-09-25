@@ -24,7 +24,7 @@ import jpademo.jpademo.model.repository.ExpenseRepository;
 
 @RestController
 @RequestMapping("/api/expenses")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(originPatterns = "*")
 public class ExpenseController {
 
     @Autowired
