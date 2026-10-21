@@ -1,3 +1,9 @@
+databases:
+  - name: budget-ai-db
+    databaseName: jwt_demo
+    user: budget_user
+    plan: free
+
 services:
   # Spring Boot Backend Service on Render
   - type: web
@@ -8,13 +14,23 @@ services:
     plan: free
     envVars:
       - key: PORT
-        value: 8080
+        value: 10000
       - key: SPRING_DATASOURCE_URL
-        sync: false
+        fromDatabase:
+          name: budget-ai-db
+          property: connectionString
       - key: SPRING_DATASOURCE_USERNAME
-        sync: false
+        fromDatabase:
+          name: budget-ai-db
+          property: user
       - key: SPRING_DATASOURCE_PASSWORD
-        sync: false
+        fromDatabase:
+          name: budget-ai-db
+          property: password
+      - key: DB_DRIVER
+        value: org.postgresql.Driver
+      - key: DB_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
       - key: JWT_SECRET
         sync: false
       - key: FRONTEND_URL
